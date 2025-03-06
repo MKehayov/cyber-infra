@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: iris
+  name: iris-app
+  labels:
+    app: iris-app
+spec:
+  replicas: 1
+  serviceName: iris-app
+  selector:
+    matchLabels:
+      app: iris-app
+  template:
+    metadata:
+      labels:
+        app: iris-app
+    spec:
+      volumes:
+        - name: conf-files
+          configMap:
+            name: conf-files
+            defaultMode: 0755
+      containers:
+      - name: iris-app
+        image: python:3.9
+        volumeMounts:
+          - name: conf-files
+            mountPath: /var/lib/iris/start.sh
+            subPath: start.sh
+          - name: iris
+            mountPath: /home/iris/downloads
+            subPath: downloads
+          - name: iris
+            mountPath: /home/iris/user_templates
+            subPath: user_templates
+          - name: iris
+            mountPath: /home/iris/server_data
+            subPath: server_data
+        ports:
+        - containerPort: 8000
+        command: ["/bin/sh", "-c", "cd /var/lib/iris ; ./start.sh ; cd /iriswebapp ; ./iris-entrypoint.sh iriswebapp"]
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 40
+          periodSeconds: 5
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: password
+          - name: POSTGRES_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin
+          - name: POSTGRES_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin_password
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: port
+          - name: DOCKERIZED
+            value: "1"
+          - name: IRIS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: iris-secret
+                key: secret
+          - name: IRIS_SECURITY_PASSWORD_SALT
+            valueFrom:
+              secretKeyRef:
+                name: iris-secret
+                key: salt
+          - name: POSTGRES_SERVER
+            value: "postgres.datastore.svc.cluster.local"
+  volumeClaimTemplates:
+    - metadata:
+        name: iris
+        namespace: iris
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: datastore
+
+secretGenerator:
+  - name: indexer-certs
+    files:
+      - certs/root-ca.pem
+      - certs/node.pem
+      - certs/node-key.pem
+      - certs/dashboard.pem
+      - certs/dashboard-key.pem
+      - certs/admin.pem
+      - certs/admin-key.pem
+      - certs/filebeat.pem
+      - certs/filebeat-key.pem
+
+configMapGenerator:
+  - name: indexer-conf
+    files:
+      - wazuh/indexer_conf/opensearch.yml
+      - wazuh/indexer_conf/internal_users.yml
+      - wazuh/indexer_conf/roles.yml
+      - wazuh/indexer_conf/roles_mapping.yml
+
+resources:
+  - datastore-ns.yaml
+
+  - secrets/indexer-cred-secret.yaml
+
+  - wazuh/indexer-svc.yaml
+  - wazuh/indexer-sts.yaml

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: datastore
+  name: postgres
+spec:
+  replicas: 1
+  serviceName: postgres
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+        - name: postgres-config
+          configMap:
+            name: conf-files
+      containers:
+      - name: postgres
+        image: postgres:12-alpine
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: password
+          - name: POSTGRES_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin
+          - name: POSTGRES_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin_password
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: database
+        volumeMounts:
+        - name: postgres
+          mountPath: /var/lib/postgresql/data
+          subPath: psqldata
+        - name: postgres-config
+          mountPath: /docker-entrypoint-initdb.d/10-postgres-init.sh
+          subPath: postgres-init.sh
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres
+        namespace: datastore
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

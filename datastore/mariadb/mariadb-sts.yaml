@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: datastore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+      name: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:11.1
+          volumeMounts:
+            - name: mariadb
+              mountPath: /var/lib/mysql
+          ports:
+            - containerPort: 3306
+              name: mariadb-port
+          env:
+            - name: MYSQL_DATABASE
+              value: misp
+            - name: MYSQL_USER
+              value: misp
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-cred
+                  key: password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-cred
+                  key: root_password
+  volumeClaimTemplates:
+    - metadata:
+        name: mariadb
+        namespace: datastore
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

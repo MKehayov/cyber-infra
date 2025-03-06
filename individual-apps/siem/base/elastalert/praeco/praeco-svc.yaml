@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: praeco
+  namespace: elastalert
+  labels:
+    app: praeco
+spec:
+  selector:
+    app: praeco
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: p-port-http
+  clusterIP: None

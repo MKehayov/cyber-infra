@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: datastore
+  name: redis
+spec:
+  replicas: 1
+  serviceName: redis
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.2
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis
+          mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis
+        namespace: datastore
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

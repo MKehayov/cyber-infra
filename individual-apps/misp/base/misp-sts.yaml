@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: misp
+  namespace: misp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: misp
+  serviceName: misp
+  template:
+    metadata:
+      labels:
+        app: misp
+      name: misp
+    spec:
+      containers:
+        - name: misp
+          image: ghcr.io/nukib/misp:latest
+          ports:
+            - containerPort: 80
+              name: misp-port-http
+            # ZeroMq port
+            - containerPort: 50000
+              name: misp-z-port
+          env:
+            - name: MISP_BASEURL
+              value: http://localhost:8080
+            - name: MYSQL_HOST
+              value: mariadb.datastore.svc.cluster.local
+            - name: MYSQL_LOGIN
+              value: misp
+            - name: MYSQL_DATABASE
+              value: misp
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-cred
+                  key: password
+            - name: REDIS_HOST
+              value: redis.datastore.svc.cluster.local
+            - name: MISP_UUID
+              valueFrom:
+                secretKeyRef:
+                  name: misp
+                  key: uuid
+            - name: SECURITY_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: misp
+                  key: salt
+            - name: MISP_ORG
+              value: Default-Org
+            - name: MISP_EMAIL
+              value: office@default-org.com
+            - name: MISP_MODULE_URL
+              value: http://misp-modules.misp.svc.cluster.local:6666
+            - name: ZEROMQ_ENABLED
+              value: "yes"
+  volumeClaimTemplates:
+    - metadata:
+        name: misp
+        namespace: misp
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

@@ -1,0 +1,67 @@
+---
+
+_meta:
+  type: "rolesmapping"
+  config_version: 2
+
+all_access:
+  reserved: false
+  backend_roles:
+  - "admin"
+  description: "Maps admin to all_access"
+
+grafana:
+  reserved: false
+  users:
+  - "grafana"
+
+index_manager:
+  reserved: false
+  users:
+  - "graylog"
+  - "praeco"
+  - "shuffle"
+
+own_index:
+  reserved: false
+  users:
+  - "*"
+  description: "Allow full access to an index named like the username"
+
+kibana_user:
+  reserved: false
+  backend_roles:
+  - "kibanauser"
+  users:
+  - "wazuh_user"
+  - "wazuh_admin"    
+  description: "Maps kibanauser to kibana_user"
+
+readall:
+  reserved: false
+  backend_roles:
+  - "readall"
+
+kibana_server:
+  reserved: true
+  users:
+  - "kibanaserver"
+
+wazuh_ui_admin:
+  reserved: true
+  hidden: false
+  backend_roles: []
+  hosts: []
+  users:
+  - "wazuh_admin"
+  - "kibanaserver"
+  and_backend_roles: []
+
+wazuh_ui_user:
+  reserved: true
+  hidden: false
+  backend_roles: []
+  hosts: []
+  users:
+  - "wazuh_user"
+  and_backend_roles: []

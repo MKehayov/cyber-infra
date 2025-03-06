@@ -1,0 +1,29 @@
+{
+    "appName": "elastalert-server",
+    "port": 3030,
+    "wsport": 3333,
+    "elastalertPath": "/opt/elastalert",
+    "verbose": false,
+    "es_debug": false,
+    "debug": false,
+    "rulesPath": {
+        "relative": true,
+        "path": "/rules"
+    },
+    "templatesPath": {
+        "relative": true,
+        "path": "/rule_templates"
+    },
+    "dataPath": {
+        "relative": true,
+        "path": "/server_data"
+    },
+    "es_host": "wazuh-indexer.datastore.svc.cluster.local",
+    "es_port": 9200,
+    "es_username": "praeco",
+    "es_password": "SecretPassword",
+    "es_ssl": true,
+    "ea_verify_certs": false,
+    "opensearch_flg": true,
+    "writeback_index": "praeco_elastalert_status"
+}

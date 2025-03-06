@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-dashboard
+  namespace: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-dashboard
+  template:
+    metadata:
+      labels:
+        app: grafana-dashboard
+      name: grafana-dashboard
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: dashboard-conf
+        - name: dashboard-certs
+          secret:
+            secretName: dashboard-certs
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.1.5
+          env:
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-opensearch-datasource,grafana-worldmap-panel"
+          ports:
+            - containerPort: 3000
+              name: http-grafana
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 750Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/grafana/grafana.ini
+              subPath: grafana.ini
+              readOnly: true
+            - name: dashboard-certs
+              mountPath: /etc/grafana/certs/cert.pem
+              readOnly: true
+              subPath: cert.pem
+            - name: dashboard-certs
+              mountPath: /etc/grafana/certs/key.pem
+              readOnly: true
+              subPath: key.pem
+            - name: config
+              mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+              subPath: datasource.yaml

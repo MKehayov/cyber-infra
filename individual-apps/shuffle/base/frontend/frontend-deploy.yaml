@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuffle-frontend
+  namespace: shuffle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuffle-frontend
+  template:
+    metadata:
+      labels:
+        app: shuffle-frontend
+      name: shuffle-frontend
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: dashboard-conf
+        - name: dashboard-certs
+          secret:
+            secretName: dashboard-certs
+      containers:
+        - name: shuffle-frontend
+          image: 'ghcr.io/shuffle/shuffle-frontend:1.3.1'
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          ports:
+            - containerPort: 80
+              name: sh-front-http
+            - containerPort: 443
+              name: sh-front-https
+          env:
+            - name: BACKEND_HOSTNAME
+              value: 'shuffle-backend.shuffle.svc.cluster.local'
+            

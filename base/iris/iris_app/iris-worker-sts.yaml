@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: iris
+  name: iris-worker
+  labels:
+    app: iris-worker
+spec:
+  replicas: 1
+  serviceName: iris-worker
+  selector:
+    matchLabels:
+      app: iris-worker
+  template:
+    metadata:
+      labels:
+        app: iris-worker
+    spec:
+      volumes:
+        - name: conf-files
+          configMap:
+            name: conf-files
+            defaultMode: 0755
+      containers:
+      - name: iris-worker
+        image: python:3.9
+        volumeMounts:
+          - name: conf-files
+            mountPath: /var/lib/iris/start.sh
+            subPath: start.sh
+          - name: iris
+            mountPath: /home/iris/downloads
+            subPath: downloads
+          - name: iris
+            mountPath: /home/iris/user_templates
+            subPath: user_templates
+          - name: iris
+            mountPath: /home/iris/server_data
+            subPath: server_data
+        command: ["/bin/sh", "-c", "cd /var/lib/iris ; ./start.sh ; cd /iriswebapp ; ./wait-for-iriswebapp.sh iris-app.iris.svc.cluster.local:8000 ; ./iris-entrypoint.sh iris-worker"] 
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: password
+          - name: POSTGRES_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin
+          - name: POSTGRES_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: admin_password
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: port
+          - name: DOCKERIZED
+            value: "1"
+          - name: IRIS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: iris-secret
+                key: secret
+          - name: IRIS_SECURITY_PASSWORD_SALT
+            valueFrom:
+              secretKeyRef:
+                name: iris-secret
+                key: salt
+          - name: POSTGRES_SERVER
+            value: "postgres.datastore.svc.cluster.local"
+          - name: CELERY_BROKER
+            value: "amqp://iris-rabbitmq.iris.svc.cluster.local"
+          - name: IRIS_WORKER
+            value: "iris-worker.iris.svc.cluster.local"
+  volumeClaimTemplates:
+    - metadata:
+        name: iris
+        namespace: iris
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

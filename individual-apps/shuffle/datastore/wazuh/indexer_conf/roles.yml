@@ -1,0 +1,62 @@
+_meta:
+  type: "roles"
+  config_version: 2
+
+index_manager:
+  reserved: false
+  hidden: false
+  cluster_permissions:
+    - "cluster_all"
+    - "indices_all"
+  index_permissions:
+    - index_patterns:
+        - "*"
+      dls: ""
+      fls: []
+      masked_fields: []
+      allowed_actions:
+        - "crud"
+        - "index"
+        - "indices_all"
+  tenant_permissions: []
+  static: false
+
+kibana_read_only:
+  reserved: true
+
+# The security REST API access role is used to assign specific users access to change the security settings through the REST API.
+security_rest_api_access:
+  reserved: true
+
+wazuh_ui_user:
+  reserved: true
+  hidden: false
+  cluster_permissions: []
+  index_permissions:
+  - index_patterns:
+    - "wazuh-*"
+    dls: ""
+    fls: []
+    masked_fields: []
+    allowed_actions:
+    - "read"
+  tenant_permissions: []
+  static: false        
+
+wazuh_ui_admin:
+  reserved: true
+  hidden: false
+  cluster_permissions: []
+  index_permissions:
+  - index_patterns:
+    - "wazuh-*"
+    dls: ""
+    fls: []
+    masked_fields: []
+    allowed_actions:
+    - "read"
+    - "delete"
+    - "manage"
+    - "index"
+  tenant_permissions: []
+  static: false  

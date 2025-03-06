@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: graylog
+  namespace: graylog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: graylog
+  serviceName: graylog
+  template:
+    metadata:
+      labels:
+        app: graylog
+      name: graylog
+    spec:
+      volumes:
+        - name: graylog-certs
+          secret:
+            secretName: graylog-certs
+        - name: graylog-config
+          configMap:
+            name: conf-files
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: graylog
+          image: 'graylog/graylog:5.1.7'
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+          ports:
+            - containerPort: 9000
+              name: graylog-port
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: GRAYLOG_ELASTICSEARCH_HOSTS
+              valueFrom:
+                secretKeyRef:
+                  name: elastic-cred
+                  key: uri
+            - name: GRAYLOG_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-db-cred
+                  key: uri
+            - name: GRAYLOG_SERVER_JAVA_OPTS
+              value: "-Dlog4j2.formatMsgNoLookups=true -Djavax.net.ssl.trustStore=/etc/graylog/certs/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+          volumeMounts:
+            - name: graylog-certs
+              mountPath: /etc/graylog/certs/root-ca.pem
+              subPath: root-ca.pem
+            - name: graylog-config
+              mountPath: /usr/share/graylog/data/contentpacks/graylog-init-content-pack.json
+              subPath: graylog-init-content-pack.json
+            - name: graylog-config
+              mountPath: /usr/share/graylog/data/config/graylog.conf
+              subPath: graylog.conf
+            - name: graylog-config
+              mountPath: /usr/share/graylog/data/config/log4j2.xml
+              subPath: log4j2.xml
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp -a /opt/java/openjdk/lib/security/cacerts /etc/graylog/certs/cacerts ; keytool -noprompt -importcert -keystore /etc/graylog/certs/cacerts -storepass changeit -alias root_ca -file /etc/graylog/certs/root-ca.pem"]
+  volumeClaimTemplates:
+    - metadata:
+        name: graylog
+        namespace: graylog
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 10Gi

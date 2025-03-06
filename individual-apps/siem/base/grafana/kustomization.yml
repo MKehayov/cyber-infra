@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana
+
+secretGenerator:
+  - name: dashboard-certs
+    files:
+      - certs/cert.pem
+      - certs/key.pem
+
+configMapGenerator:
+  - name: dashboard-conf
+    files:
+      - config/grafana.ini
+      - config/datasource.yaml
+
+resources:
+  - grafana-ns.yaml
+
+  - grafana-svc.yaml
+  - grafana-deploy.yaml
+

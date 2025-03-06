@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: shuffle-backend
+  namespace: shuffle
+spec:
+  replicas: 1
+  serviceName: shuffle-backend
+  selector:
+    matchLabels:
+      app: shuffle-backend
+  template:
+    metadata:
+      labels:
+        app: shuffle-backend
+      name: shuffle-backend
+    spec:
+      containers:
+        - name: shuffle-backend
+          image: "ghcr.io/shuffle/shuffle-backend:1.3.1"
+          volumeMounts:
+          - name: shuffle-data
+            mountPath: /app/generated
+          - name: shuffle-data 
+            mountPath: /shuffle-files
+          - name: shuffle-data 
+            mountPath: /shuffle-apps
+          ports:
+            - containerPort: 5001
+              name: sh-back-port
+          env:
+            - name: BACKEND_HOSTNAME
+              value: "shuffle-backend.shuffle.svc.cluster.local"
+            - name: BACKEND_PORT
+              value: "5001"
+            - name: BASE_URL
+              value: "http://shuffle-backend.shuffle.svc.cluster.local:5001"
+            - name: SHUFFLE_APP_DOWNLOAD_LOCATION
+              value: "https://github.com/shuffle/python-apps"
+            - name: SHUFFLE_APP_FORCE_UPDATE
+              value: "false"
+            - name: SHUFFLE_APP_HOTLOAD_FOLDER
+              value: "/shuffle-apps"
+            - name: SHUFFLE_APP_HOTLOAD_LOCATION
+              value: "/shuffle-apps"
+            - name: SHUFFLE_BASE_IMAGE_NAME
+              value: "shuffle"
+            - name: SHUFFLE_BASE_IMAGE_REGISTRY
+              value: "ghcr.io"
+            - name: SHUFFLE_BASE_IMAGE_TAG_SUFFIX
+              value: "-1.0.0"
+            - name: SHUFFLE_CHAT_DISABLED
+              value: "false"
+            - name: SHUFFLE_CONTAINER_AUTO_CLEANUP
+              value: "false"
+            - name: SHUFFLE_ELASTIC
+              value: "true"
+            - name: SHUFFLE_LOGS_DISABLED
+              value: "false"
+            - name: SHUFFLE_OPENSEARCH_SKIPSSL_VERIFY
+              value: "true"
+            - name: SHUFFLE_OPENSEARCH_URL
+              value: "https://wazuh-indexer.datastore.svc.cluster.local:9200"
+            - name: SHUFFLE_OPENSEARCH_USERNAME
+              value: "admin"
+            - name: SHUFFLE_OPENSEARCH_PASSWORD
+              value: "SecretPassword"
+            - name: SHUFFLE_PASS_APP_PROXY
+              value: "false"
+            - name: SHUFFLE_PASS_WORKER_PROXY
+              value: "true"
+            - name: SHUFFLE_RERUN_SCHEDULE
+              value: "300"
+            - name: IS_KUBERNETES
+              value: "true"
+  volumeClaimTemplates:
+    - metadata:
+        name: shuffle-data
+        namespace: shuffle
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

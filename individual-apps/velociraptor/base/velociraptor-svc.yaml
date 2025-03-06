@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: velociraptor
+  namespace: velociraptor
+  labels:
+    app: velociraptor
+spec:
+  selector:
+    app: velociraptor
+  ports:
+    - name: v-port-1
+      port: 8000
+      targetPort: 8000
+    - name: v-port-2
+      port: 8001
+      targetPort: 8001
+    - name: v-port-3
+      port: 8889
+      targetPort: 8889
+  clusterIP: None

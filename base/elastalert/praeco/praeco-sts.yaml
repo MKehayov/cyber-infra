@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: praeco
+  namespace: elastalert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: praeco
+  serviceName: praeco
+  template:
+    metadata:
+      labels:
+        app: praeco
+      name: praeco
+    spec:
+      volumes:
+        - name: conf-files
+          configMap:
+            name: conf-files
+      initContainers:
+        - name: wait-hack
+          image: busybox
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          command:
+            - sh
+            - '-c'
+            - 'sleep 75'
+      containers:
+        - name: praeco
+          image: praecoapp/praeco:1.8.16
+          volumeMounts:
+            - name: conf-files
+              mountPath: /var/www/html/praeco.config.json
+              subPath: praeco.config.json
+            - name: conf-files
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: conf-files
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          ports:
+            - containerPort: 8080
+              name: p-port-http
+          env:
+            - name: PRAECO_ELASTICSEARCH
+              value: wazuh-indexer.datastore.svc.cluster.local
+  volumeClaimTemplates:
+    - metadata:
+        name: praeco
+        namespace: elastalert
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

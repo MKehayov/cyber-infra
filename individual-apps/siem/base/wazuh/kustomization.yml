@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: wazuh
+
+secretGenerator:
+  - name: indexer-certs
+    files:
+      - certs/indexer_cluster/root-ca.pem
+      - certs/indexer_cluster/filebeat.pem
+      - certs/indexer_cluster/filebeat-key.pem
+  - name: dashboard-certs
+    files:
+      - certs/dashboard_http/cert.pem
+      - certs/dashboard_http/key.pem
+      - certs/indexer_cluster/root-ca.pem
+
+configMapGenerator:
+  - name: wazuh-conf
+    files:
+      - wazuh_managers/wazuh_conf/master.conf
+      - wazuh_managers/wazuh_conf/worker.conf
+      - wazuh_managers/wazuh_conf/filebeat.yml
+      - wazuh_managers/wazuh_conf/lists/common-ports
+      - wazuh_managers/wazuh_conf/rules_decoders/install.sh
+  - name: dashboard-conf
+    files:
+      - wazuh-dashboard/dashboard_conf/opensearch_dashboards.yml
+  - name: wazuh-custom-agent-groups
+    files:
+      - wazuh_managers/wazuh_conf/agent_groups/Linux/linux_agent.conf
+      - wazuh_managers/wazuh_conf/agent_groups/Linux/linux_merged.mg
+      - wazuh_managers/wazuh_conf/agent_groups/Windows/windows_agent.conf
+      - wazuh_managers/wazuh_conf/agent_groups/Windows/windows_merged.mg
+      - wazuh_managers/wazuh_conf/agent_groups/MacOS/macos_agent.conf
+      - wazuh_managers/wazuh_conf/agent_groups/MacOS/macos_merged.mg
+
+resources:
+  - wazuh-ns.yaml
+
+  - secrets/wazuh-api-cred-secret.yaml
+  - secrets/wazuh-authd-pass-secret.yaml
+  - secrets/wazuh-cluster-key-secret.yaml
+  - secrets/dashboard-cred-secret.yaml
+  - secrets/indexer-cred-secret.yaml
+
+  - wazuh_managers/wazuh-cluster-svc.yaml
+  - wazuh_managers/wazuh-master-svc.yaml
+  - wazuh_managers/wazuh-workers-svc.yaml
+  - wazuh_managers/wazuh-master-sts.yaml
+  - wazuh_managers/wazuh-worker-sts.yaml
+
+  - wazuh-dashboard/dashboard-svc.yaml
+  - wazuh-dashboard/dashboard-deploy.yaml

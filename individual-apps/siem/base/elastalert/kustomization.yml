@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: elastalert
+
+configMapGenerator:
+  - name: conf-files
+    files:
+      - config/api.config.json
+      - config/BaseRule.config
+      - config/default.conf
+      - config/elastalert.yaml
+      - config/nginx.conf
+      - config/praeco.config.json
+
+resources:
+  - elastalert-ns.yaml
+
+  - elastalert_app/elastalert-sts.yaml
+  - elastalert_app/elastalert-svc.yaml
+
+  - praeco/praeco-sts.yaml
+  - praeco/praeco-svc.yaml
+
+

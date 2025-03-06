@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: velociraptor
+  name: velociraptor
+  labels:
+    app: velociraptor
+spec:
+  replicas: 1
+  serviceName: velociraptor
+  selector:
+    matchLabels:
+      app: velociraptor
+  template:
+    metadata:
+      labels:
+        app: velociraptor
+    spec:
+      volumes:
+        - name: conf-files
+          configMap:
+            name: conf-files
+            defaultMode: 0755
+      containers:
+      - name: velociraptor
+        image: ubuntu:22.04
+        volumeMounts:
+          - name: conf-files
+            mountPath: /opt/velociraptor/start.sh
+            subPath: start.sh
+        ports:
+        - name: v-port-1
+          containerPort: 8000
+        - name: v-port-2
+          containerPort: 8001
+        - name: v-port-3
+          containerPort: 8889
+        command: ["/bin/sh", "-c", "./opt/velociraptor/start.sh"]
+        env:
+          - name: VELOX_USER
+            valueFrom:
+              secretKeyRef:
+                name: velociraptor-secret
+                key: user
+          - name: VELOX_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: velociraptor-secret
+                key: password
+          - name: VELOX_ROLE
+            valueFrom:
+              secretKeyRef:
+                name: velociraptor-secret
+                key: role
+          - name: VELOX_SERVER_URL
+            value: https://velociraptor:8000/
+          - name: VELOX_FRONTEND_HOSTNAME
+            value: velociraptor
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /velociraptor/finished
+          initialDelaySeconds: 60
+          periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: velociraptor
+        namespace: velociraptor
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

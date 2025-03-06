@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: misp-modules
+  namespace: misp
+  labels:
+    app: misp-modules
+spec:
+  selector:
+    app: misp-modules
+  ports:
+    - port: 6666
+      targetPort: 6666
+      name: misp-mods-p
+  clusterIP: None

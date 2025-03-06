@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graylog
+  namespace: graylog
+  labels:
+    app: graylog
+spec:
+  selector:
+    app: graylog
+  ports:
+    - port: 9000
+      targetPort: 9000
+  clusterIP: None

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: misp-modules
+  namespace: misp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: misp-modules
+  serviceName: misp-modules
+  template:
+    metadata:
+      labels:
+        app: misp-modules
+      name: misp-modules
+    spec:
+      containers:
+        - name: misp-modules
+          image: ghcr.io/nukib/misp-modules:latest
+          ports:
+            - containerPort: 6666
+              name: misp-mods-p

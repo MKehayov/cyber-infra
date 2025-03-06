@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elastalert
+  namespace: elastalert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastalert
+  serviceName: elastalert
+  template:
+    metadata:
+      labels:
+        app: elastalert
+      name: elastalert
+    spec:
+      volumes:
+        - name: conf-files
+          configMap:
+            name: conf-files
+      initContainers:
+        - name: wait-hack
+          image: busybox
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          command:
+            - sh
+            - '-c'
+            - 'sleep 60'
+      containers:
+        - name: elastalert
+          image: praecoapp/elastalert-server:20231017
+          volumeMounts:
+            - name: conf-files
+              mountPath: /opt/elastalert/config.yaml
+              subPath: elastalert.yaml
+            - name: conf-files
+              mountPath: /opt/elastalert-server/config/config.json
+              subPath: api.config.json
+          ports:
+            - containerPort: 3030
+              name: el-port-1
+            - containerPort: 3333
+              name: el-port-2
+  volumeClaimTemplates:
+    - metadata:
+        name: elastalert
+        namespace: elastalert
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: app-storage
+        resources:
+          requests:
+            storage: 5Gi

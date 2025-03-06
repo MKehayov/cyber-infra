@@ -1,0 +1,428 @@
+{
+  "v": 1,
+  "id": "127bfd02-915c-46c7-98d3-7799ab74b69b",
+  "rev": 1,
+  "name": "Init Content Pack",
+  "summary": "Initial graylog config",
+  "description": "",
+  "vendor": "Company",
+  "url": "",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "e8ef928b-d99d-45b5-a0e5-f805db7b12b3",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Linux sysmon event 3 log normalization"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Linux rule for sysmon event 3 log normalization"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Linux sysmon event 3 log normalization\"\nwhen\n    $message.rule_group1 == \"linux\" AND $message.rule_group3 == \"sysmon_event3\"\nthen\n    set_field(\"process_image\", $message.data_eventdata_image);\n    set_field(\"process_id\", $message.data_eventdata_processId);\n    set_field(\"protocol\", $message.data_eventdata_protocol);\n    set_field(\"user_name\", $message.data_eventdata_user);\n    set_field(\"dst_ip\", $message.data_eventdata_DestinationIp);\n    set_field(\"dst_port\", $message.data_eventdata_destinationPort);\n    set_field(\"src_ip\", $message.data_eventdata_sourceIp);\n    set_field(\"src_port\", $message.data_eventdata_sourcePort);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.1.7+fcde74a"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "97d66a94-9b4b-44c0-bed9-093c38ae72f0",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Filebeat Input"
+        },
+        "configuration": {
+          "tls_key_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 5044
+          },
+          "tls_enable": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 1048572
+          },
+          "tcp_keepalive": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "tls_client_auth_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "no_beats_prefix": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "tls_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "tls_client_auth": {
+            "@type": "string",
+            "@value": "disabled"
+          },
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 8
+          },
+          "tls_key_password": {
+            "@type": "string",
+            "@value": ""
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog.plugins.beats.Beats2Input"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": [
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "list_separator": {
+                "@type": "string",
+                "@value": ", "
+              },
+              "kv_separator": {
+                "@type": "string",
+                "@value": ":"
+              },
+              "key_prefix": {
+                "@type": "string",
+                "@value": ""
+              },
+              "key_separator": {
+                "@type": "string",
+                "@value": "_"
+              },
+              "replace_key_whitespace": {
+                "@type": "boolean",
+                "@value": false
+              },
+              "key_whitespace_replacement": {
+                "@type": "string",
+                "@value": "_"
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "JSON Message Extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "JSON"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "rule_group1"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "index": {
+                "@type": "integer",
+                "@value": 1
+              },
+              "split_by": {
+                "@type": "string",
+                "@value": ","
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "rule_groups"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Rule Group 1"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "SPLIT_AND_INDEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "rule_group2"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "index": {
+                "@type": "integer",
+                "@value": 2
+              },
+              "split_by": {
+                "@type": "string",
+                "@value": ","
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "rule_groups"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Rule Group 2"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "SPLIT_AND_INDEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "rule_group3"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "index": {
+                "@type": "integer",
+                "@value": 3
+              },
+              "split_by": {
+                "@type": "string",
+                "@value": ","
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "rule_groups"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Rule Group 3"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "SPLIT_AND_INDEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.1.7+fcde74a"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "1e74a557-abd4-44a9-9460-5ae84a002a37",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Sysmon event 3 - log normalization"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Windows and Linux sysmon 3 events normalization"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Sysmon event 3 - log normalization\"\nstage 0 match either\nrule \"Windows sysmon event 3 log normalization\"\nrule \"Linux sysmon event 3 log normalization\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "b6e1310b-6a8e-4c80-b52d-ac3e3d341fff"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.1.7+fcde74a"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "56301ad6-f654-467c-b4c0-12a6f37f89d3",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows sysmon event 3 log normalization"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Windows rule for sysmon event 3 log normalization"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows sysmon event 3 log normalization\"\nwhen\n    $message.rule_group1 == \"windows\" AND $message.rule_group3 == \"sysmon_event3\"\nthen\n    set_field(\"process_image\", $message.data_win_eventdata_image);\n    set_field(\"process_id\", $message.data_win_eventdata_processId);\n    set_field(\"protocol\", $message.data_win_eventdata_protocol);\n    set_field(\"user_name\", $message.data_win_eventdata_user);\n    set_field(\"dst_ip\", $message.data_win_eventdata_destinationIp);\n    set_field(\"dst_port\", $message.data_win_eventdata_destinationPort);\n    set_field(\"src_ip\", $message.data_win_eventdata_sourceIp);\n    set_field(\"src_port\", $message.data_win_eventdata_sourcePort);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.1.7+fcde74a"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "b6e1310b-6a8e-4c80-b52d-ac3e3d341fff",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Wazuh Alerts"
+        },
+        "stream_rules": [],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "AND"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Wazuh alerts"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.1.7+fcde74a"
+        }
+      ]
+    }
+  ]
+}

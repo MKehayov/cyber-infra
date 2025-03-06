@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: iris
+
+configMapGenerator:
+  - name: conf-files
+    files:
+      - config/start.sh
+
+resources:
+  - storage-class.yaml
+
+  - iris-ns.yaml
+
+  - secrets/postgres-cred-secret.yaml
+  - secrets/iris-cred-secret.yaml
+
+  - iris_app/iris-sts.yaml
+  - iris_app/iris-svc.yaml
+  - iris_app/iris-worker-sts.yaml
+  - iris_app/iris-worker-svc.yaml
+
+  - rabbitmq/rabbitmq-deploy.yaml
+  - rabbitmq/rabbitmq-svc.yaml
+
+

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graylog-inputs
+  namespace: graylog
+  labels:
+    app: graylog
+spec:
+  type: LoadBalancer
+  selector:
+    app: graylog
+  ports:
+    - port: 5044
+      targetPort: 5044
